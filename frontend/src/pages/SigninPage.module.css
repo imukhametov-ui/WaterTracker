@@ -1,0 +1,158 @@
+.page {
+  width: 100%;
+  min-height: calc(100vh - 72px);
+  position: relative;
+  padding: 0 16px;
+  font-family: "Roboto", Arial, sans-serif;
+}
+
+.container {
+  position: absolute;
+  top: 150px;
+  left: calc(50% + 120px);
+  width: 384px;
+  max-width: calc(100% - 32px);
+}
+
+.title {
+  margin: 0 0 16px;
+  color: #2f2f2f;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  color: #2f2f2f;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.input,
+.passwordWrapper {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  border: 1px solid #d7e3ff;
+  border-radius: 6px;
+  background-color: #ffffff;
+}
+
+.input {
+  padding: 12px 10px;
+  color: #2f2f2f;
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.input::placeholder,
+.passwordInput::placeholder {
+  color: #9ebbff;
+}
+
+.input:focus,
+.passwordWrapper:focus-within {
+  border-color: #407bff;
+}
+
+.passwordWrapper {
+  display: flex;
+  align-items: center;
+  padding: 0 6px 0 10px;
+}
+
+.passwordInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: #2f2f2f;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.eyeButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.eyeButton img {
+  width: 16px;
+  height: 16px;
+}
+
+.submitButton {
+  width: 100%;
+  height: 44px;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 10px;
+  background-color: #407bff;
+  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.34);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: #3369df;
+}
+
+.signupLink {
+  display: inline-block;
+  margin-top: 16px;
+  color: #407bff;
+  font-size: 16px;
+  line-height: 20px;
+  text-decoration: none;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .container {
+    left: auto;
+    right: 32px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    display: flex;
+    justify-content: center;
+    padding: 80px 16px 40px;
+  }
+
+  .container {
+    position: static;
+    width: 100%;
+    max-width: 384px;
+  }
+}

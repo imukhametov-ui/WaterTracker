@@ -1,0 +1,201 @@
+.page {
+  width: 100%;
+  min-height: calc(100vh - 110px);
+  padding: 100px 24px 80px;
+  font-family: "Roboto", Arial, sans-serif;
+  color: #2f2f2f;
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 81px;
+  max-width: 1014px;
+  margin: 0 auto;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 439px;
+  flex-shrink: 0;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heading h1 {
+  margin: 0;
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 700;
+}
+
+.heading p {
+  margin: 0;
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 400;
+}
+
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefits h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.benefitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.benefit img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 384px;
+  min-height: 44px;
+  padding: 10px 30px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background-color: #407bff;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  box-shadow: 0 4px 8px rgba(64, 123, 255, 0.34);
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #2d66e8;
+}
+
+.waterCard {
+  width: 494px;
+  min-height: 332px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 32px 24px;
+  border-radius: 10px;
+  background-color: #ecf2ff;
+  box-shadow: 0 4px 14px rgba(64, 123, 255, 0.3);
+}
+
+.waterCard h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.waterList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.waterList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.waterList li::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background-color: #407bff;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .content {
+    gap: 40px;
+  }
+
+  .intro,
+  .waterCard {
+    width: min(100%, 494px);
+    flex: 1 1 0;
+  }
+
+  .button {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 48px 20px;
+  }
+
+  .content {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .intro,
+  .waterCard {
+    width: 100%;
+    flex: auto;
+  }
+
+  .heading h1 {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .heading p {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .button {
+    width: 100%;
+  }
+}
