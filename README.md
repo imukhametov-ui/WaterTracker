@@ -15,7 +15,7 @@ The final application will be deployed online and presented as a working MVP.
 | Member | Role | Responsibilities |
 |---|---|---|
 | Ihor Mukhametov | Team Lead / Backend Developer | Architecture, backend, database, API, GitHub Projects, integration |
-| Frontend Developer | Frontend Developer | React components, UI, styling, frontend integration |
+| Yelyzaveta Biriukova  | Frontend Developer | React components, UI, styling, frontend integration |
 | Both developers | QA / Code Review | Testing, bug fixing, Pull Request reviews |
 
 All team members participate in development, task planning, and code review.
