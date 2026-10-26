@@ -15,3 +15,5 @@ dist/
 
 # Test coverage
 coverage/
+
+/src/generated/prisma
