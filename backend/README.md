@@ -72,11 +72,28 @@ Start the compiled application:
 npm start
 ```
 
+
 ## TypeScript Check
 
 ```bash
 npm run typecheck
 ```
+
+## Automated Tests
+
+Run automated backend tests:
+
+```bash
+npm test
+```
+
+Tests use Vitest and Supertest.
+
+The Health Check tests verify:
+- HTTP 200 response
+- JSON response body
+- Content-Type: application/json
+- Access without authentication
 
 ## Health Check
 
@@ -95,6 +112,9 @@ Expected JSON response:
 
 Expected HTTP status: `200 OK`.
 
+The endpoint is public and does not require authentication.
+
+
 ## Project Structure
 
 ```text
@@ -106,7 +126,7 @@ backend/
 │   ├── routes/        # API routes
 │   ├── app.ts         # Express application
 │   └── server.ts      # Server startup
-├── tests/             # Automated tests (planned)
+├── tests/             # Automated API tests (Vitest + Supertest)
 ├── .env.example       # Environment variable template
 ├── package.json       # Dependencies and scripts
 ├── tsconfig.json      # TypeScript configuration
