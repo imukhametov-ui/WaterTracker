@@ -73,3 +73,39 @@ export default defineConfig([
 ])
 
 ```
+
+## API Client
+
+The frontend uses a reusable API client located in `src/services/api.ts`.
+
+### Configuration
+
+Create a `.env` file in the `frontend` directory using `.env.example` as a template:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+The backend URL is configured through the `VITE_API_URL` environment variable.
+
+### Usage
+
+Import the API client:
+
+```typescript
+import { api } from "./services/api";
+```
+
+The client supports GET, POST, PATCH, and DELETE requests.
+
+### Error Handling
+
+The API client throws `ApiRequestError` for network errors and unsuccessful HTTP responses.
+
+The error contains:
+- `message` — error description.
+- `status` — HTTP status code, or `null` for network errors.
+
+### Authentication
+
+Requests use `credentials: "include"` to support httpOnly cookies.
