@@ -1,10 +1,12 @@
 
+
 export const swaggerDocument = {
   openapi: "3.0.3",
   info: {
     title: "WaterTracker API",
     version: "1.0.0",
-    description: "REST API for tracking daily water consumption",
+    description:
+      "REST API for tracking daily water consumption. Authentication uses an HttpOnly JWT cookie. State-changing requests require an Origin header matching CLIENT_URL.",
   },
   servers: [
     {
@@ -14,10 +16,12 @@ export const swaggerDocument = {
   ],
   components: {
     securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT",
+      cookieAuth: {
+        type: "apiKey",
+        in: "cookie",
+        name: "watertracker_token",
+        description:
+          "JWT stored in an HttpOnly cookie after successful login.",
       },
     },
     schemas: {
@@ -74,6 +78,8 @@ export const swaggerDocument = {
       post: {
         tags: ["Authentication"],
         summary: "Register a new user",
+        description:
+          "Requires an Origin header matching CLIENT_URL. Registration does not automatically log in the user.",
         requestBody: {
           required: true,
           content: {
@@ -87,6 +93,7 @@ export const swaggerDocument = {
         responses: {
           "201": { description: "User registered successfully" },
           "400": { description: "Invalid registration data" },
+          "403": { description: "Forbidden origin" },
           "409": { description: "Email already registered" },
           "500": { description: "Internal server error" },
         },
@@ -95,7 +102,9 @@ export const swaggerDocument = {
     "/api/auth/login": {
       post: {
         tags: ["Authentication"],
-        summary: "Log in and receive JWT",
+        summary: "Log in and set JWT cookie",
+        description:
+          "Requires an Origin header matching CLIENT_URL. On success, sets the HttpOnly watertracker_token cookie. The JWT is not returned in the JSON response.",
         requestBody: {
           required: true,
           content: {
@@ -107,9 +116,63 @@ export const swaggerDocument = {
           },
         },
         responses: {
-          "200": { description: "Login successful" },
+          "200": {
+            description: "Login successful; authentication cookie set",
+            headers: {
+              "Set-Cookie": {
+                description:
+                  "HttpOnly watertracker_token cookie containing the JWT",
+                schema: { type: "string" },
+              },
+            },
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example: "Login successful",
+                    },
+                    user: {
+                      $ref: "#/components/schemas/User",
+                    },
+                  },
+                },
+              },
+            },
+          },
           "400": { description: "Invalid login data" },
           "401": { description: "Invalid email or password" },
+          "403": { description: "Forbidden origin" },
+          "500": { description: "Internal server error" },
+        },
+      },
+    },
+    "/api/auth/logout": {
+      post: {
+        tags: ["Authentication"],
+        summary: "Log out and clear authentication cookie",
+        description:
+          "Requires an Origin header matching CLIENT_URL. Clears the authentication cookie from the browser.",
+        responses: {
+          "200": {
+            description: "Logout successful",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example: "Logout successful",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "403": { description: "Forbidden origin" },
           "500": { description: "Internal server error" },
         },
       },
@@ -118,7 +181,7 @@ export const swaggerDocument = {
       get: {
         tags: ["Authentication"],
         summary: "Get current authenticated user",
-        security: [{ bearerAuth: [] }],
+        security: [{ cookieAuth: [] }],
         responses: {
           "200": {
             description: "Current user",
