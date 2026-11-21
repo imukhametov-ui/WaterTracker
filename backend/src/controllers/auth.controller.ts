@@ -1,20 +1,14 @@
-
-import type { Request, Response } from "express";
+import type { Request, Response, RequestHandler } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Prisma } from "../generated/prisma/client.js";
 import { prisma } from "../config/prisma.js";
 import { env } from "../config/env.js";
-import {
-  registerSchema,
-  loginSchema,
-} from "../validators/auth.validator.js";
+import { registerSchema, loginSchema } from "../validators/auth.validator.js";
+import { AUTH_COOKIE_NAME, authCookieOptions } from "../config/auth-cookie.js";
 
 // REGISTER
-export async function register(
-  req: Request,
-  res: Response
-): Promise<void> {
+export async function register(req: Request, res: Response): Promise<void> {
   const validation = registerSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -64,10 +58,7 @@ export async function register(
 }
 
 // LOGIN
-export async function login(
-  req: Request,
-  res: Response
-): Promise<void> {
+export async function login(req: Request, res: Response): Promise<void> {
   const validation = loginSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -91,10 +82,7 @@ export async function login(
     return;
   }
 
-  const isPasswordValid = await bcrypt.compare(
-    password,
-    user.passwordHash
-  );
+  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isPasswordValid) {
     res.status(401).json({
@@ -103,15 +91,15 @@ export async function login(
     return;
   }
 
-  const token = jwt.sign(
-    { userId: user.id },
-    env.JWT_SECRET,
-    { expiresIn: "1h", algorithm: "HS256" }
-  );
+  const token = jwt.sign({ userId: user.id }, env.JWT_SECRET, {
+    expiresIn: "1h",
+    algorithm: "HS256",
+  });
+
+  res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
 
   res.status(200).json({
     message: "Login successful",
-    token,
     user: {
       id: user.id,
       name: user.name,
@@ -119,3 +107,16 @@ export async function login(
     },
   });
 }
+
+export const logout: RequestHandler = (_req, res) => {
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    path: authCookieOptions.path,
+    httpOnly: authCookieOptions.httpOnly,
+    secure: authCookieOptions.secure,
+    sameSite: authCookieOptions.sameSite,
+  });
+
+  res.status(200).json({
+    message: "Logout successful",
+  });
+};

@@ -1,25 +1,16 @@
-
 import type { RequestHandler } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { env } from "../config/env.js";
+import { AUTH_COOKIE_NAME } from "../config/auth-cookie.js";
 
 interface AuthPayload extends JwtPayload {
   userId: string;
 }
 
 export const authenticate: RequestHandler = (req, res, next) => {
-  const authorization = req.headers.authorization;
+  const token = req.cookies?.[AUTH_COOKIE_NAME];
 
-  if (!authorization?.startsWith("Bearer ")) {
-    res.status(401).json({
-      message: "Authentication token required",
-    });
-    return;
-  }
-
-  const token = authorization.slice(7).trim();
-
-  if (!token) {
+  if (typeof token !== "string" || !token) {
     res.status(401).json({
       message: "Authentication token required",
     });
