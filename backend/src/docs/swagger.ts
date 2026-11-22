@@ -8,7 +8,7 @@ export const swaggerDocument = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
+      url: "http://[::1]:3001",
       description: "Local development server",
     },
   ],
@@ -48,14 +48,8 @@ export const swaggerDocument = {
         type: "object",
         required: ["email", "password"],
         properties: {
-          email: {
-            type: "string",
-            format: "email",
-          },
-          password: {
-            type: "string",
-            format: "password",
-          },
+          email: { type: "string", format: "email" },
+          password: { type: "string", format: "password" },
         },
       },
       User: {
@@ -67,8 +61,34 @@ export const swaggerDocument = {
           createdAt: { type: "string", format: "date-time" },
         },
       },
+      WaterRecord: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          userId: { type: "string", format: "uuid" },
+          amount: {
+            type: "integer",
+            minimum: 1,
+            example: 250,
+            description: "Amount of water in milliliters",
+          },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      WaterRecordRequest: {
+        type: "object",
+        required: ["amount"],
+        properties: {
+          amount: {
+            type: "integer",
+            minimum: 1,
+            example: 250,
+          },
+        },
+      },
     },
   },
+
   paths: {
     "/api/auth/register": {
       post: {
@@ -92,6 +112,7 @@ export const swaggerDocument = {
         },
       },
     },
+
     "/api/auth/login": {
       post: {
         tags: ["Authentication"],
@@ -114,6 +135,7 @@ export const swaggerDocument = {
         },
       },
     },
+
     "/api/auth/me": {
       get: {
         tags: ["Authentication"],
@@ -136,6 +158,201 @@ export const swaggerDocument = {
             },
           },
           "401": { description: "Unauthorized" },
+          "500": { description: "Internal server error" },
+        },
+      },
+    },
+
+    "/api/water-records": {
+      post: {
+        tags: ["Water Records"],
+        summary: "Create a water consumption record",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/WaterRecordRequest",
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Water record created successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string" },
+                    waterRecord: {
+                      $ref: "#/components/schemas/WaterRecord",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { description: "Invalid water record data" },
+          "401": { description: "Unauthorized" },
+          "500": { description: "Internal server error" },
+        },
+      },
+
+      get: {
+        tags: ["Water Records"],
+        summary: "Get water consumption history",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Water records retrieved successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    waterRecords: {
+                      type: "array",
+                      items: {
+                        $ref: "#/components/schemas/WaterRecord",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
+          "500": { description: "Internal server error" },
+        },
+      },
+    },
+
+    "/api/water-records/today": {
+      get: {
+        tags: ["Water Records"],
+        summary: "Get total water consumption for today",
+        description: "Calculates today's water consumption in UTC.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Daily water total retrieved successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    date: {
+                      type: "string",
+                      format: "date",
+                      example: "2026-11-22",
+                    },
+                    totalAmount: {
+                      type: "integer",
+                      minimum: 0,
+                      example: 550,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
+          "500": { description: "Internal server error" },
+        },
+      },
+    },
+
+    "/api/water-records/{id}": {
+      patch: {
+        tags: ["Water Records"],
+        summary: "Update a water consumption record",
+        description: "Only the record owner can update the record.",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "Water record ID",
+            schema: {
+              type: "string",
+              format: "uuid",
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/WaterRecordRequest",
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Water record updated successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: { type: "string" },
+                    waterRecord: {
+                      $ref: "#/components/schemas/WaterRecord",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { description: "Invalid request data" },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Water record not found" },
+          "500": { description: "Internal server error" },
+        },
+      },
+
+      delete: {
+        tags: ["Water Records"],
+        summary: "Delete a water consumption record",
+        description: "Only the record owner can delete the record.",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            description: "Water record ID",
+            schema: {
+              type: "string",
+              format: "uuid",
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Water record deleted successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      example: "Water record deleted successfully",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { description: "Unauthorized" },
+          "404": { description: "Water record not found" },
           "500": { description: "Internal server error" },
         },
       },
