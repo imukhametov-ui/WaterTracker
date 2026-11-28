@@ -3,19 +3,22 @@
 
 REST API for the WaterTracker application.
 
-
 ## Tech Stack
 
-- Node.js 20+
+- Node.js
 - Express 5
 - TypeScript
 - PostgreSQL
 - Prisma ORM 7
-- Vitest and Supertest for automated API tests (PR #24)
+- JWT authentication
+- bcrypt
+- Zod
+- Swagger / OpenAPI
+- Vitest and Supertest
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.12+ (Node.js 24 LTS recommended)
 - npm
 - PostgreSQL server
 - PostgreSQL database and dedicated database user
@@ -26,12 +29,6 @@ Check installed versions:
 node -v
 npm -v
 ```
-
-**Integration status:** PostgreSQL schema and migrations are
-implemented in PR #25. Environment validation is implemented
-in PR #28. Automated health endpoint tests are implemented
-in PR #24. These changes must be merged before all documented
-features are available on `main`.
 
 ## Installation
 
@@ -80,11 +77,76 @@ Missing required values prevent the server from starting.
 
 Never commit `.env`, database passwords, or JWT secrets to Git.
 
-**Note:** Centralized environment validation and the `CLIENT_URL`
-configuration are implemented in PR #28 (Issue #14).
-These changes must be merged before the instructions fully
-match the `main` branch.
+## Database Setup (PostgreSQL + Prisma 7)
 
+The backend uses PostgreSQL with Prisma ORM.
+
+### 1. Prepare PostgreSQL
+
+Install PostgreSQL and ensure the database server is running.
+
+Create a database and a dedicated user:
+
+```sql
+CREATE USER watertracker_user WITH PASSWORD 'your_secure_password';
+CREATE DATABASE watertracker OWNER watertracker_user;
+```
+
+For local development with `prisma migrate dev`, the database
+user must be able to create a temporary shadow database.
+
+Grant `CREATEDB` to the development user if necessary:
+
+```sql
+ALTER USER watertracker_user CREATEDB;
+```
+
+Do not grant superuser privileges.
+
+### 2. Configure DATABASE_URL
+
+In `backend/.env`, set:
+
+```dotenv
+DATABASE_URL=postgresql://watertracker_user:YOUR_PASSWORD@localhost:5432/watertracker
+```
+
+Replace `YOUR_PASSWORD` with your actual PostgreSQL password.
+
+### 3. Validate Prisma Schema
+
+```bash
+npx prisma validate --config prisma7.config.ts
+```
+
+### 4. Apply Database Migrations
+
+For local development:
+
+```bash
+npx prisma migrate dev --config prisma7.config.ts
+```
+
+For deployment:
+
+```bash
+npx prisma migrate deploy --config prisma7.config.ts
+```
+
+### 5. Generate Prisma Client
+
+```bash
+npx prisma generate --config prisma7.config.ts
+```
+
+### 6. Verify Database
+
+Use pgAdmin or another PostgreSQL client to confirm
+that the following tables exist:
+
+- User
+- WaterRecord
+- _prisma_migrations
 
 ## Development
 
@@ -126,9 +188,14 @@ Run automated backend tests:
 npm test
 ```
 
-Health endpoint tests are implemented in PR #24.
-The `npm test` script becomes available on `main`
-after that pull request is merged.
+Tests use Vitest and Supertest.
+
+The Health Check tests verify:
+
+- HTTP 200 response
+- JSON response body
+- Content-Type: application/json
+- Access without authentication
 
 ## Health Check
 
@@ -147,111 +214,70 @@ Expected JSON response:
 
 Expected HTTP status: `200 OK`.
 
+The endpoint is public and does not require authentication.
+
+## Authentication API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register a new user |
+| POST | `/api/auth/login` | Authenticate a user and receive JWT |
+| GET | `/api/auth/me` | Get the current authenticated user |
+
+Protected endpoints require a valid JWT Bearer token.
+
+Passwords are hashed using bcrypt.
+Request data is validated using Zod.
+
+## API Documentation
+
+Swagger UI:
+
+http://localhost:3000/api/docs
+
+The documentation provides API endpoints, request schemas,
+response descriptions, and authentication requirements.
 
 ## Project Structure
 
 ```text
 backend/
 ├── prisma/
-│   ├── migrations/       # Database migrations (PR #25)
-│   └── schema.prisma     # Prisma models (PR #25)
+│   ├── migrations/
+│   └── schema.prisma
 ├── src/
 │   ├── config/
-│   │   └── env.ts        # Environment validation (PR #28)
-│   ├── controllers/      # Request handlers
-│   ├── middlewares/      # Express middleware
-│   ├── routes/           # API routes
-│   ├── app.ts            # Express application
-│   └── server.ts         # Server startup
+│   │   ├── env.ts
+│   │   └── prisma.ts
+│   ├── controllers/
+│   │   └── auth.controller.ts
+│   ├── docs/
+│   │   └── swagger.ts
+│   ├── middlewares/
+│   │   ├── auth.middleware.ts
+│   │   └── error.middleware.ts
+│   ├── routes/
+│   ├── validators/
+│   │   └── auth.validator.ts
+│   ├── app.ts
+│   └── server.ts
 ├── tests/
-│   └── health.test.ts    # Health endpoint tests (PR #24)
-├── .env.example          # Environment variable template
-├── prisma7.config.ts     # Prisma configuration
-├── package.json          # Dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-└── README.md             # Backend documentation
+│   └── health.test.ts
+├── .env.example
+├── prisma7.config.ts
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+└── README.md
 ```
 
-Files marked with PR numbers are available after
-the corresponding pull requests are merged.
+## Security
 
-## Database Setup (PostgreSQL + Prisma 7)
-
-The backend uses PostgreSQL with Prisma ORM.
-
-Database models and migrations are implemented in Issue #4 (PR #25).
-Until PR #25 is merged, the Prisma schema and migration files
-are available in the `feature/prisma-models-migrations` branch.
-
-### 1. Prepare PostgreSQL
-
-Install PostgreSQL and ensure the database server is running.
-
-Create a database and a dedicated user:
-
-```sql
-CREATE USER watertracker_user WITH PASSWORD 'your_secure_password';
-CREATE DATABASE watertracker OWNER watertracker_user;
-```
-
-For local development with `prisma migrate dev`, the database
-user must be able to create a temporary shadow database.
-Grant `CREATEDB` to the development user if necessary:
-
-```sql
-ALTER USER watertracker_user CREATEDB;
-```
-
-Do not grant superuser privileges.
-
-### 2. Configure DATABASE_URL
-
-In `backend/.env`, set:
-
-```dotenv
-DATABASE_URL=postgresql://watertracker_user:YOUR_PASSWORD@localhost:5432/watertracker
-```
-
-Replace `YOUR_PASSWORD` with your actual PostgreSQL password.
-Never commit `.env` to Git.
-
-### 3. Validate Prisma Schema
-
-From the `backend` directory:
-
-```bash
-npx prisma validate --config prisma7.config.ts
-```
-
-### 4. Apply Database Migrations
-
-For local development:
-
-```bash
-npx prisma migrate dev --config prisma7.config.ts
-```
-
-For environments where migrations must only be applied,
-such as deployment:
-
-```bash
-npx prisma migrate deploy --config prisma7.config.ts
-```
-
-### 5. Generate Prisma Client
-
-```bash
-npx prisma generate --config prisma7.config.ts
-```
-
-### 6. Verify Database
-
-Use pgAdmin or another PostgreSQL client to confirm
-that the following tables exist:
-
-- User
-- WaterRecord
-- _prisma_migrations
-
-The Prisma schema and migrations must be present
-in the current branch before running these commands.
+- Password hashing with bcrypt
+- JWT authentication
+- Protected API endpoints
+- Request validation with Zod
+- Centralized environment validation
+- CORS configuration
+- Centralized error handling
+- Sensitive configuration stored in environment variables
